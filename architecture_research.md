@@ -1,0 +1,126 @@
+# Architecture Research: AI 얼굴 분석 퀴즈 플랫폼 (가칭)
+
+> Source of Truth 문서. 모든 개발은 이 문서와 이후 작성될 `plan.md` 기준으로 진행.
+
+## 1. 비즈니스 요약
+
+| 항목 | 결정 |
+|---|---|
+| 수익 모델 | Google AdSense (트래픽 최대화) |
+| MVP 범위 | 혈액형 + 나이 측정 + 관상, 3종 퀴즈 플랫폼 |
+| 트래픽 소스 | 인스타/틱톡 결과 공유 바이럴 + SEO(각 퀴즈별 랜딩) |
+| 브랜드 | **FaceLab (페이스랩)**, 도메인: facelab.app | nextidealab과 완전 분리, Vercel 신규 프로젝트 |
+| 배포 | Vercel (신규 프로젝트로 분리 생성) |
+
+## 2. 블로킹 액션 아이템 (착수 전 필수 확인)
+
+- [x] 모델 소유권 확인 완료 → **본인 모델 아님 (튜토리얼 파생)**. 기존 `_M9B9ilaU` 모델은 정식 배포에서 폐기.
+- [ ] **3종 모델 신규 학습 (Teachable Machine)**
+  - 혈액형(A/B/O/AB): 기존 라벨 유지, 데이터셋만 재구축
+  - 나이 측정: TM은 분류 모델만 지원 → 연속값 회귀 대신 **연령대 구간 분류**(10대/20대/30대/40대+ 등)로 설계
+  - 관상: 라벨 체계부터 새로 설계 필요 (아래 참고)
+- [ ] **관상 콘텐츠 리스크 처리**: 관상은 과학적 근거가 없는 재미 콘텐츠 → 결과 카피에 "재미로 보는 콘텐츠"임을 명시해야 AdSense 정책(오해 소지 있는 콘텐츠) 및 사용자 신뢰 문제 회피 가능
+- [ ] 브랜드명 확정 (11번 참고) → 도메인 구매
+- [ ] 개인정보처리방침 페이지 작성 (사진이 서버로 전송/저장되지 않는다는 점 명시 — AdSense 심사 + 사용자 신뢰 둘 다 해결)
+- [ ] AddThis(서비스 종료됨), Disqus 등 레거시 서드파티 스크립트 전량 제거
+
+## 3. 추천 기술 스택 (비용 최소화 우선)
+
+| 영역 | 선택 | 이유 |
+|---|---|---|
+| Frontend | Next.js 14 (App Router) + Tailwind + shadcn/ui | 기존 스택 재사용, SSR/ISR로 SEO 확보 |
+| AI 추론 | TensorFlow.js, 브라우저 내 클라이언트 추론 | **서버 GPU 비용 0원**, 이미지가 서버로 안 가서 프라이버시 정책도 단순해짐 |
+| 모델 | Teachable Machine (MobileNet 전이학습) 자체 재학습 | 라벨 확장 자유, 저작권 리스크 해소 |
+| 호스팅 | Vercel (기존 인프라 재사용) | 기존 프로젝트들과 동일 워크플로우 (git push 자동배포) |
+| DB | Supabase (Postgres) | 무료 티어로 충분, 결과 집계용 최소 스키마만 |
+| 공유 이미지 | Next.js OG Image API (Vercel 내장, Satori 기반) | 서버리스, 별도 렌더링 비용 없음 — 바이럴 루프 핵심 |
+| 광고 | Google AdSense | 별도 서버 불필요, 스니펫만 삽입 |
+| 분석 | GA4 + Vercel Analytics | 무료 |
+
+## 4. 플러그인형 아키텍처 (다중 퀴즈 확장 대비)
+
+새 퀴즈 추가 시 **코드 수정 없이 데이터만 추가**하는 구조로 설계:
+
+```
+/config/quizzes/
+  blood-type.ts       ← { slug, title, modelUrl, labels, resultCopy, ogTemplate }
+  age-estimate.ts      ← 나이 측정 (연령대 구간 분류)
+  face-reading.ts      ← 관상 (재미 콘텐츠 disclaimer 포함)
+```
+
+- 공통 컴포넌트 1개(`<QuizRunner quiz={config} />`)가 업로드 → 추론 → 결과 → 공유카드 전체를 처리
+- URL: `/quiz/[slug]` 동적 라우트, 신규 퀴즈는 config 파일 하나 + 모델 URL만 추가하면 끝
+
+## 5. DB 스키마 (Supabase, 최소 구성)
+
+```sql
+-- 퀴즈 메타데이터 (선택: config 파일로 관리해도 무방, 관리자 페이지 만들 경우만 필요)
+create table quizzes (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  title text not null,
+  model_url text not null,
+  description text,
+  created_at timestamptz default now()
+);
+
+-- 익명 결과 집계 (PII 없음, 얼굴 이미지 저장 안 함)
+create table quiz_results (
+  id uuid primary key default gen_random_uuid(),
+  quiz_id uuid references quizzes(id),
+  result_label text not null,
+  created_at timestamptz default now()
+);
+```
+
+- 회원가입/로그인 불필요 (MVP는 완전 익명)
+- 이미지 자체는 절대 DB/Storage에 저장하지 않음 → 정책 리스크 + 스토리지 비용 둘 다 회피
+
+## 6. API/라우트 스펙
+
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| GET | `/quiz/[slug]` | 퀴즈 페이지 (ISR, SEO 대응) |
+| POST | `/api/result-log` | 결과 라벨만 익명 카운트 적재 (선택 구현) |
+| GET | `/api/og?quiz=&result=` | 공유용 OG 이미지 동적 생성 |
+
+## 7. 수익화 설계
+
+- 광고 배치: 결과 페이지 상단 1개 + 결과 카드 하단 반응형 1개 (과다 배치는 AdSense 정책 위반 → 승인 거절 사유)
+- 승인 전 체크리스트: 개인정보처리방침 / 이용약관 / 퀴즈별 설명 콘텐츠(최소 200~300자) / About 페이지
+- 트래픽 임계치 도달 전엔 심사조차 안 열릴 수 있음 → 바이럴 공유 기능(OG 카드)이 사실상 수익화의 전제조건
+
+## 8. 3일 MVP 실행 순서 (Time-to-Market)
+
+| Day | 작업 |
+|---|---|
+| 1 | 신규 Vercel 프로젝트 셋업, 브랜드 디자인 시스템 적용, 혈액형 퀴즈(재학습 모델) 포팅, 레거시 스크립트 제거 |
+| 2 | 나이 측정 + 관상 퀴즈 골격 추가(플러그인 구조 검증), OG 공유카드 구현 |
+| 3 | AdSense 슬롯, 개인정보처리방침/약관/About 페이지, 배포 |
+
+> 주의: 3종 모델 학습(데이터 수집 포함)은 이 3일 일정에 포함되지 않음 — 병행 또는 선행 작업으로 별도 진행 필요.
+
+## 9. 비용 추정
+
+| 항목 | 비용 |
+|---|---|
+| Vercel Hobby | $0 (트래픽 늘면 Pro $20/mo) |
+| Supabase Free | $0 |
+| AdSense | 가입 무료, 수익만 발생 |
+| 도메인 | nextidealab.app 서브도메인 활용 시 $0 |
+
+## 11. 브랜드 확정
+
+**FaceLab (페이스랩)** — 도메인: `facelab.app`
+
+| 후보 검토 | 톤 |
+|---|---|
+| ~~관상연구소~~ | 전통/신뢰 (탈락) |
+| ~~낯보기~~ | 순우리말 (탈락) |
+| ~~AI관상소~~ | AI+전통 (탈락) |
+| **페이스랩 (FaceLab)** ✅ | 모던/영어, 확장성 좋음 (혈액형/나이/관상 외 향후 퀴즈 추가 시 브랜드명 제약 없음) |
+
+## 10. 확장 로드맵 (참고용, 지금 안 함)
+
+- Phase 2: 일본/영어 다국어 대응으로 해외 바이럴 트래픽 확보
+- Phase 3: 상세 분석 리포트 유료화(프리미엄 결과지)
