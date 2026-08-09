@@ -67,21 +67,21 @@ export default function Home() {
             accentColor="blood"
             title="혈액형 분석"
             description="AI가 얼굴 특징에서 혈액형 패턴을 찾아드려요. 결과는 인스타 스토리로 바로 공유 가능."
-            href="#"
+            href="/quiz/blood-type"
           />
           <QuizCard
             labNumber="LAB-02"
             accentColor="amber"
             title="나이 측정"
             description="동안일까, 노안일까? AI 추정 연령대와 실제 나이를 비교해보세요."
-            href="#"
+            href="/quiz/age-estimate"
           />
           <QuizCard
             labNumber="LAB-03"
             accentColor="jade"
             title="관상 리포트"
             description="전통 관상학 x AI 재해석. 과학적 근거보다는 재미로 즐겨주세요."
-            href="#"
+            href="/quiz/face-reading"
           />
         </div>
       </section>

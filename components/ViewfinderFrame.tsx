@@ -3,12 +3,20 @@ import React from 'react';
 interface ViewfinderFrameProps {
   children: React.ReactNode;
   caption?: React.ReactNode;
+  accentColor?: 'scan' | 'blood' | 'amber' | 'jade';
 }
 
-export default function ViewfinderFrame({ children, caption }: ViewfinderFrameProps) {
+export default function ViewfinderFrame({ children, caption, accentColor = 'scan' }: ViewfinderFrameProps) {
+  const colorClass = {
+    scan: 'text-scan',
+    blood: 'text-blood',
+    amber: 'text-amber',
+    jade: 'text-jade',
+  }[accentColor];
+
   return (
     <div className="relative aspect-[4/5] max-w-sm mx-auto w-full">
-      <div className="bracket text-scan absolute inset-0"><span></span></div>
+      <div className={`bracket ${colorClass} absolute inset-0`}><span></span></div>
       <div className="absolute inset-6 rounded-2xl bg-white border border-line overflow-hidden flex items-center justify-center">
         {children}
         <div className="scanline"></div>
