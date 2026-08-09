@@ -170,7 +170,36 @@
     letter-spacing: 0.02em;
   }
 
+  @keyframes growWidth {
+    from { width: 0; }
+  }
+
+  @keyframes holo {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .holographic-overlay {
+    background: linear-gradient(125deg, 
+      rgba(255,0,0,0.5), 
+      rgba(255,154,0,0.5), 
+      rgba(208,222,33,0.5), 
+      rgba(79,220,74,0.5), 
+      rgba(63,218,216,0.5), 
+      rgba(47,201,226,0.5), 
+      rgba(28,127,238,0.5), 
+      rgba(95,21,242,0.5), 
+      rgba(186,12,248,0.5), 
+      rgba(251,7,217,0.5), 
+      rgba(255,0,0,0.5)
+    );
+    background-size: 400% 400%;
+    animation: holo 8s ease infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .scanline { animation: none; display: none; }
+    .holographic-overlay { animation: none; }
   }
 }

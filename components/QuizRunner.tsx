@@ -1,21 +1,24 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { QuizConfig } from '@/config/quizzes';
 import ViewfinderFrame from './ViewfinderFrame';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import ScanSequence from './ScanSequence';
 import ResultReveal from './ResultReveal';
+import SpecimenCard from './SpecimenCard';
+import ShareButtons from './ShareButtons';
 
 interface QuizRunnerProps {
   quiz: QuizConfig;
 }
 
 export default function QuizRunner({ quiz }: QuizRunnerProps) {
-  const [result, setResult] = React.useState<{ label: string; accuracy: number; rarityText: string } | null>(null);
+  const [result, setResult] = React.useState<any | null>(null);
   const [isScanning, setIsScanning] = React.useState(false);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -92,6 +95,31 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
   }
 
   if (result) {
+    if (quiz.slug === 'blood-type') {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 px-6 w-full">
+          <SpecimenCard
+            ref={cardRef}
+            imageUrl={previewUrl || undefined}
+            quiz={quiz}
+            label={result.label}
+            accuracy={result.accuracy}
+            rarityText={result.rarityText}
+            cardNumber={result.cardNumber}
+            stats={result.stats}
+            rarityTier={result.rarityTier}
+          />
+          <ShareButtons
+            cardRef={cardRef}
+            quizSlug={quiz.slug}
+            cardNumber={result.cardNumber}
+            accentColor={quiz.accentColor}
+            onReset={handleReset}
+          />
+        </div>
+      );
+    }
+
     return (
       <ResultReveal
         accentColor={quiz.accentColor}
