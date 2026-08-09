@@ -2,8 +2,21 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FaceLab",
-  description: "사진 한 장으로 혈액형/나이/관상을 분석하는 AI 얼굴 분석 퀴즈 플랫폼",
+  title: 'FaceLab — 사진 한 장으로 알아보는 혈액형·나이·관상',
+  description: 'AI가 브라우저에서 바로 분석해요. 사진은 저장되지 않습니다. 혈액형, 나이, 관상을 무료로 확인해보세요.',
+  openGraph: {
+    title: 'FaceLab — 사진 한 장으로 알아보는 혈액형·나이·관상',
+    description: 'AI가 브라우저에서 바로 분석해요. 사진은 저장되지 않습니다. 혈액형, 나이, 관상을 무료로 확인해보세요.',
+    url: 'https://facelab.app',
+    siteName: 'FaceLab',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'FaceLab — 사진 한 장으로 알아보는 혈액형·나이·관상',
+    description: 'AI가 브라우저에서 바로 분석해요. 사진은 저장되지 않습니다. 혈액형, 나이, 관상을 무료로 확인해보세요.',
+  },
+  metadataBase: new URL('https://facelab.app'),
 };
 
 export default function RootLayout({

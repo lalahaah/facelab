@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getQuizBySlug, quizzes } from '@/config/quizzes';
 import QuizRunner from '@/components/QuizRunner';
@@ -7,6 +8,35 @@ export function generateStaticParams() {
   return quizzes.map((quiz) => ({
     slug: quiz.slug,
   }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const quiz = getQuizBySlug(slug);
+
+  if (!quiz) {
+    return {
+      title: 'Quiz Not Found',
+    };
+  }
+
+  return {
+    title: `${quiz.title} - FaceLab`,
+    description: quiz.description,
+    openGraph: {
+      title: `${quiz.title} - FaceLab`,
+      description: quiz.description,
+      url: `https://facelab.app/quiz/${slug}`,
+    },
+    twitter: {
+      title: `${quiz.title} - FaceLab`,
+      description: quiz.description,
+    },
+  };
 }
 
 export default async function QuizPage({
