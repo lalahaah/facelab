@@ -8,7 +8,7 @@
 
 - [ ] Vercel 신규 프로젝트 생성 (`facelab`)
 - [ ] `facelab.app` 도메인 구매 + Vercel 연결
-- [ ] Supabase 신규 프로젝트 생성
+- [ ] Firebase 신규 프로젝트 생성 (Firestore 활성화)
 - [ ] GitHub 신규 레포 생성 (`lalahaah/facelab`)
 - [ ] 로컬에 `cd facelab` 후 `agy` 실행 준비
 
@@ -25,7 +25,6 @@ facelab/
 │   ├── terms/page.tsx
 │   ├── about/page.tsx
 │   └── api/
-│       ├── result-log/route.ts
 │       └── og/route.tsx
 ├── components/
 │   ├── ViewfinderFrame.tsx         # 브라켓+스캔라인 시그니처 컴포넌트
@@ -38,29 +37,27 @@ facelab/
 │       ├── age-estimate.ts
 │       └── face-reading.ts
 ├── lib/
-│   └── supabase.ts
+│   └── firebase.ts
 └── public/
     └── models/                     # TM 모델 export (모델 학습 완료 후)
 ```
 
-## 2. DB 스키마 (Supabase) — architecture_research.md 기준 확정
+## 2. DB 스키마 (Firebase Firestore) — architecture_research.md 기준 확정
 
-```sql
-create table quiz_results (
-  id uuid primary key default gen_random_uuid(),
-  quiz_slug text not null,
-  result_label text not null,
-  created_at timestamptz default now()
-);
+```
+컬렉션: quiz_results
+  quizSlug: string
+  resultLabel: string
+  createdAt: Timestamp (serverTimestamp)
 ```
 
-이미지/PII 컬럼 없음. `quizzes` 메타데이터는 DB 대신 `config/quizzes/*.ts` 정적 파일로 관리(관리자 페이지 불필요, 배포 즉시 반영).
+이미지/PII 없음. `quizzes` 메타데이터는 DB 대신 `config/quizzes/*.ts` 정적 파일로 관리.
+서버 API 라우트 없이 `QuizRunner`에서 Firestore 클라이언트 SDK로 직접 write (보안 규칙: create만 허용).
 
 ## 3. API 스펙
 
 | 메서드 | 경로 | 요청 | 응답 |
 |---|---|---|---|
-| POST | `/api/result-log` | `{ quizSlug, resultLabel }` | `{ ok: true }` |
 | GET | `/api/og` | `?quiz=&result=` | PNG (OG 이미지) |
 
 ## 4. 태스크 목록
@@ -83,12 +80,15 @@ create table quiz_results (
 - [ ] **TASK-004** `quizzes` config 구조 + `/quiz/[slug]` 라우트 스캐폴딩 (UI만, 모델 미연동)
   - 파일: `config/quizzes/*.ts`, `app/quiz/[slug]/page.tsx`
   - 검증: 3개 슬러그 모두 라우팅 정상, 업로드 UI 표시
-- [ ] **TASK-006** OG 이미지 공유카드 API (쿼리 파라미터 결과값 기준, 모델 불필요)
+- [x] **TASK-006** OG 이미지 공유카드 API (쿼리 파라미터 결과값 기준, 모델 불필요)
   - 파일: `app/api/og/route.tsx`, `components/ShareCard.tsx`
   - 검증: `/api/og?quiz=blood-type&result=B형` 접속 시 9:16 이미지 생성 확인
-- [ ] **TASK-007** Supabase 연결 + `quiz_results` 테이블 + `/api/result-log`
-  - 파일: `lib/supabase.ts`, `app/api/result-log/route.ts`
-  - 검증: Supabase Table Editor에서 결과 적재 확인 (직접 API 호출로 테스트)
+  - ✅ 완료. 한글 깨짐 없음(edge 런타임 기본 폰트로 fallback). 단, IBM Plex Sans KR 브랜드 폰트는 아님
+  - 📌 백로그: 브랜드 폰트 임베딩 (TASK-006B, 배포 전 아무 때나 진행 가능, 안 막힘)
+- [ ] **TASK-007** Firebase 연결 + Firestore write-only 결과 로그
+  - 파일: `lib/firebase.ts`, `components/QuizRunner.tsx` (결과 확정 시 write 호출 추가)
+  - API 라우트 없음 — 클라이언트에서 직접 Firestore write
+  - 검증: Firebase Console → Firestore에서 결과 적재 확인
 
 ### Day 3 — 정책 페이지 + 수익화 + 배포 (모델 없이 완료 가능)
 

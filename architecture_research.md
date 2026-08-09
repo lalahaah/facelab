@@ -32,7 +32,7 @@
 | AI 추론 | TensorFlow.js, 브라우저 내 클라이언트 추론 | **서버 GPU 비용 0원**, 이미지가 서버로 안 가서 프라이버시 정책도 단순해짐 |
 | 모델 | Teachable Machine (MobileNet 전이학습) 자체 재학습 | 라벨 확장 자유, 저작권 리스크 해소 |
 | 호스팅 | Vercel (기존 인프라 재사용) | 기존 프로젝트들과 동일 워크플로우 (git push 자동배포) |
-| DB | Supabase (Postgres) | 무료 티어로 충분, 결과 집계용 최소 스키마만 |
+| DB | Firebase Firestore (클라이언트 SDK, write-only) | Supabase 무료 계정 한도(계정당 2개) 문제로 변경. 서버 API/서비스 계정 키 없이 브라우저에서 직접 write — 더 가벼움 |
 | 공유 이미지 | Next.js OG Image API (Vercel 내장, Satori 기반) | 서버리스, 별도 렌더링 비용 없음 — 바이럴 루프 핵심 |
 | 광고 | Google AdSense | 별도 서버 불필요, 스니펫만 삽입 |
 | 분석 | GA4 + Vercel Analytics | 무료 |
@@ -51,38 +51,37 @@
 - 공통 컴포넌트 1개(`<QuizRunner quiz={config} />`)가 업로드 → 추론 → 결과 → 공유카드 전체를 처리
 - URL: `/quiz/[slug]` 동적 라우트, 신규 퀴즈는 config 파일 하나 + 모델 URL만 추가하면 끝
 
-## 5. DB 스키마 (Supabase, 최소 구성)
+## 5. DB 스키마 (Firebase Firestore, 최소 구성)
 
-```sql
--- 퀴즈 메타데이터 (선택: config 파일로 관리해도 무방, 관리자 페이지 만들 경우만 필요)
-create table quizzes (
-  id uuid primary key default gen_random_uuid(),
-  slug text unique not null,
-  title text not null,
-  model_url text not null,
-  description text,
-  created_at timestamptz default now()
-);
-
--- 익명 결과 집계 (PII 없음, 얼굴 이미지 저장 안 함)
-create table quiz_results (
-  id uuid primary key default gen_random_uuid(),
-  quiz_id uuid references quizzes(id),
-  result_label text not null,
-  created_at timestamptz default now()
-);
+```
+컬렉션: quiz_results
+문서 필드:
+  quizSlug: string       (예: 'blood-type')
+  resultLabel: string    (예: 'B형')
+  createdAt: Timestamp   (서버 타임스탬프)
 ```
 
-- 회원가입/로그인 불필요 (MVP는 완전 익명)
-- 이미지 자체는 절대 DB/Storage에 저장하지 않음 → 정책 리스크 + 스토리지 비용 둘 다 회피
+- 회원가입/로그인 불필요, 완전 익명
+- 이미지 자체는 저장하지 않음 (privacy + 비용 회피)
+- Firestore 보안 규칙: **create만 허용, read/update/delete는 전부 차단**
+  ```
+  match /quiz_results/{doc} {
+    allow create: if request.resource.data.keys().hasOnly(['quizSlug', 'resultLabel', 'createdAt'])
+                  && request.resource.data.quizSlug is string
+                  && request.resource.data.resultLabel is string;
+    allow read, update, delete: if false;
+  }
+  ```
+  → 이렇게 하면 서버 API 라우트나 서비스 계정 키 없이 클라이언트 SDK로 바로 write 가능, 집계 확인은 Firebase Console에서만.
 
 ## 6. API/라우트 스펙
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
 | GET | `/quiz/[slug]` | 퀴즈 페이지 (ISR, SEO 대응) |
-| POST | `/api/result-log` | 결과 라벨만 익명 카운트 적재 (선택 구현) |
 | GET | `/api/og?quiz=&result=` | 공유용 OG 이미지 동적 생성 |
+
+> 결과 로그는 별도 API 라우트 없이 `QuizRunner`에서 Firestore 클라이언트 SDK로 직접 write (서버/서비스 계정 키 불필요).
 
 ## 7. 수익화 설계
 
