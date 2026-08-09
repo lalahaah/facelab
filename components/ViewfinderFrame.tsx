@@ -1,9 +1,10 @@
 import React from 'react';
+import { AccentColor } from '@/types/quiz';
 
 interface ViewfinderFrameProps {
   children: React.ReactNode;
   caption?: React.ReactNode;
-  accentColor?: 'scan' | 'blood' | 'amber' | 'jade';
+  accentColor?: AccentColor;
 }
 
 export default function ViewfinderFrame({ children, caption, accentColor = 'scan' }: ViewfinderFrameProps) {

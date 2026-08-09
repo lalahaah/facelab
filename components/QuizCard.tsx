@@ -1,15 +1,22 @@
 import React from 'react';
 import Link from 'next/link';
 
+import { AccentColor } from '@/types/quiz';
+
 interface QuizCardProps {
   labNumber: string;
-  accentColor: 'blood' | 'amber' | 'jade';
+  accentColor: AccentColor;
   title: string;
   description: string;
   href: string;
 }
 
-const colorStyles = {
+const colorStyles: Record<AccentColor, { text: string; bgLight: string; bgDark: string }> = {
+  scan: {
+    text: 'text-scan',
+    bgLight: 'bg-scan/10',
+    bgDark: 'bg-scan',
+  },
   blood: {
     text: 'text-blood',
     bgLight: 'bg-blood/10',

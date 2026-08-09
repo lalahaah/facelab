@@ -1,9 +1,11 @@
+import { AccentColor } from '@/types/quiz';
+
 export interface QuizConfig {
   slug: string;
   labNumber: string;
   title: string;
   description: string;
-  accentColor: 'blood' | 'amber' | 'jade';
+  accentColor: AccentColor;
   modelUrl: string;
   resultCopyIntro: string;
 }

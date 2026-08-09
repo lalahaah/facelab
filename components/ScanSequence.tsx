@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import ViewfinderFrame from './ViewfinderFrame';
+import { AccentColor } from '@/types/quiz';
 
 interface ScanSequenceProps {
   imageUrl: string;
   statusMessages: string[];
   durationMs?: number;
   onComplete: () => void;
-  accentColor?: string;
+  accentColor?: AccentColor;
   labNumber?: string;
 }
 

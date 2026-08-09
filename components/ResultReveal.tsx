@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import ViewfinderFrame from './ViewfinderFrame';
+import { AccentColor } from '@/types/quiz';
 
 interface ResultRevealProps {
-  accentColor: string;
+  accentColor: AccentColor;
   labNumber: string;
   label: string;
   accuracy: number;

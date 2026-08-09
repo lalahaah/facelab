@@ -3,7 +3,8 @@ import { getQuizBySlug } from '@/config/quizzes';
 
 export const runtime = 'edge';
 
-const colors = {
+const colors: Record<import('@/types/quiz').AccentColor, string> = {
+  scan: '#2D5BFF',
   blood: '#E63950',
   amber: '#F2A93C',
   jade: '#1FA37D',
