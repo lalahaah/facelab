@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@config "../tailwind.config.ts";
+
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -126,5 +129,48 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  .bracket {
+    position: relative;
+  }
+  .bracket::before, .bracket::after,
+  .bracket span::before, .bracket span::after {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-color: currentColor;
+    border-style: solid;
+  }
+  .bracket::before { top: -1px; left: -1px; border-width: 3px 0 0 3px; }
+  .bracket::after { top: -1px; right: -1px; border-width: 3px 3px 0 0; }
+  .bracket span::before { bottom: -1px; left: -1px; border-width: 0 0 3px 3px; }
+  .bracket span::after { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; }
+
+  @keyframes scanline {
+    0% { top: 6%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 92%; opacity: 0; }
+  }
+  .scanline {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #2D5BFF, transparent);
+    animation: scanline 3.2s ease-in-out infinite;
+  }
+
+  .catalog-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scanline { animation: none; display: none; }
   }
 }
