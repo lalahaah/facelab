@@ -78,24 +78,20 @@ create table quiz_results (
   - 파일: `app/page.tsx`, `components/ViewfinderFrame.tsx`, `components/QuizCard.tsx`
   - 검증: 데스크톱/모바일 반응형, 와이어프레임과 레이아웃 일치
 
-### Day 2 — 퀴즈 플로우 + 공유카드
+### Day 2 — 퀴즈 플로우 + 공유카드 (모델 학습 전까지 진행 가능한 것들만)
 
 - [ ] **TASK-004** `quizzes` config 구조 + `/quiz/[slug]` 라우트 스캐폴딩 (UI만, 모델 미연동)
   - 파일: `config/quizzes/*.ts`, `app/quiz/[slug]/page.tsx`
   - 검증: 3개 슬러그 모두 라우팅 정상, 업로드 UI 표시
-- [ ] **TASK-005** TensorFlow.js 클라이언트 추론 연동
-  - 파일: `components/QuizRunner.tsx`
-  - ⚠️ 전제조건: 3종 모델(혈액형/나이/관상) 학습 완료 후 `public/models/`에 배치. **미완료 시 플레이스홀더 모델로 UI 검증만 진행**
-  - 검증: 업로드→분석→결과 화면까지 전체 플로우 동작
-- [ ] **TASK-006** OG 이미지 공유카드 API
+- [ ] **TASK-006** OG 이미지 공유카드 API (쿼리 파라미터 결과값 기준, 모델 불필요)
   - 파일: `app/api/og/route.tsx`, `components/ShareCard.tsx`
   - 검증: `/api/og?quiz=blood-type&result=B형` 접속 시 9:16 이미지 생성 확인
-
-### Day 3 — 정책 페이지 + 수익화 + 배포
-
 - [ ] **TASK-007** Supabase 연결 + `quiz_results` 테이블 + `/api/result-log`
   - 파일: `lib/supabase.ts`, `app/api/result-log/route.ts`
-  - 검증: Supabase Table Editor에서 결과 적재 확인
+  - 검증: Supabase Table Editor에서 결과 적재 확인 (직접 API 호출로 테스트)
+
+### Day 3 — 정책 페이지 + 수익화 + 배포 (모델 없이 완료 가능)
+
 - [ ] **TASK-008** 정책 페이지 3종 (개인정보처리방침 / 이용약관 / About)
   - 파일: `app/privacy/page.tsx`, `app/terms/page.tsx`, `app/about/page.tsx`
   - 필수 문구: "사진은 서버로 전송/저장되지 않으며 브라우저에서만 처리됩니다"
@@ -103,6 +99,14 @@ create table quiz_results (
   - 파일: `app/layout.tsx`, `components/AdSlot.tsx`
 - [ ] **TASK-010** Vercel 배포 + `facelab.app` 도메인 연결 + env 변수 설정
   - 검증: 실제 도메인 접속 확인, Lighthouse 모바일 점수 체크
+
+### 모델 학습 완료 후 진행
+
+- [ ] **TASK-005** TensorFlow.js 클라이언트 추론 연동 (모델 3종 학습 완료 후 진행)
+  - 파일: `components/QuizRunner.tsx`
+  - 전제조건: 혈액형/나이/관상 3종 모델 학습 + `public/models/`에 배치
+  - Teachable Machine 학습 가이드는 별도로 처음부터 안내 예정 (최신 UI 기준)
+  - 검증: 업로드→분석→결과 화면까지 전체 플로우 동작
 
 ## 5. 사전 커밋 체크 (매 태스크 공통)
 
