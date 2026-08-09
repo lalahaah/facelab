@@ -135,9 +135,9 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-10 flex flex-col md:flex-row justify-between gap-4 text-xs text-inkfade">
           <p>© FaceLab. 사진은 저장되지 않으며 브라우저에서만 처리됩니다.</p>
           <div className="flex gap-5">
-            <Link href="#" className="hover:text-ink">개인정보처리방침</Link>
-            <Link href="#" className="hover:text-ink">이용약관</Link>
-            <Link href="#" className="hover:text-ink">About</Link>
+            <Link href="/privacy" className="hover:text-ink">개인정보처리방침</Link>
+            <Link href="/terms" className="hover:text-ink">이용약관</Link>
+            <Link href="/about" className="hover:text-ink">About</Link>
           </div>
         </div>
       </footer>
