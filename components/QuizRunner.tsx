@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { QuizConfig } from '@/config/quizzes';
 import ViewfinderFrame from './ViewfinderFrame';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -14,11 +14,15 @@ interface QuizRunnerProps {
   quiz: QuizConfig;
 }
 
+type QuizStep = 'upload' | 'scanning' | 'result';
+
 export default function QuizRunner({ quiz }: QuizRunnerProps) {
-  const [result, setResult] = React.useState<any | null>(null);
-  const [isScanning, setIsScanning] = React.useState(false);
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [step, setStep] = useState<QuizStep>('upload');
+  const [result, setResult] = useState<any | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -37,6 +41,7 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
       setIsScanning(true);
+      setStep('scanning');
     } else {
       console.log('Selected file:', file.name);
       
@@ -55,13 +60,19 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
 
   const handleReset = () => {
     setResult(null);
+    setIsScanning(false);
+    setStep('upload');
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
-  if (isScanning && previewUrl && quiz.slug === 'blood-type') {
+  // 1. Scanning Step
+  if (step === 'scanning' && previewUrl && quiz.slug === 'blood-type') {
     return (
       <ScanSequence 
         imageUrl={previewUrl}
@@ -87,6 +98,7 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
             
             setResult(prediction);
             setIsScanning(false);
+            setStep('result');
           };
           img.src = previewUrl;
         }}
@@ -94,7 +106,8 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     );
   }
 
-  if (result) {
+  // 2. Result Step (결과 화면에서는 업로드 input이 전혀 렌더링되지 않음)
+  if (step === 'result' && result) {
     if (quiz.slug === 'blood-type') {
       return (
         <div className="flex flex-col items-center justify-center py-16 px-6 w-full">
@@ -134,6 +147,7 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     );
   }
 
+  // 3. Upload Step (업로드 단계에서만 input[type="file"] 렌더링)
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6">
       <p className="catalog-tag text-xs font-medium mb-2" style={{ color: `var(--color-${quiz.accentColor})` }}>
@@ -150,6 +164,7 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
             </svg>
             <span className="text-sm text-inkfade">터치하여 사진 업로드</span>
             <input 
+              ref={fileInputRef}
               type="file" 
               accept="image/*" 
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas-pro';
 import { AccentColor } from '@/types/quiz';
 
 interface ShareButtonsProps {
@@ -10,26 +10,33 @@ interface ShareButtonsProps {
   onReset: () => void;
 }
 
+const ACCENT_COLOR_MAP: Record<AccentColor, string> = {
+  blood: '#E63950',
+  amber: '#F2A93C',
+  jade: '#1FA37D',
+  scan: '#2D5BFF',
+};
+
 export default function ShareButtons({ cardRef, quizSlug, cardNumber, accentColor, onReset }: ShareButtonsProps) {
   const [isExporting, setIsExporting] = useState(false);
-  const accentVar = `var(--color-${accentColor})`;
+  const accentColorValue = ACCENT_COLOR_MAP[accentColor] || '#2D5BFF';
+  const accentVar = `var(--color-${accentColor}, ${accentColorValue})`;
 
   const handleDownload = async () => {
     if (!cardRef.current || isExporting) return;
     try {
       setIsExporting(true);
-      const dataUrl = await toPng(cardRef.current, {
-        quality: 1.0,
-        pixelRatio: 2,
-        cacheBust: true,
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
       });
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = `facelab-${quizSlug}-${cardNumber}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error('Failed to generate image', err);
-      alert('이미지 생성에 실패했습니다.');
     } finally {
       setIsExporting(false);
     }
@@ -37,42 +44,60 @@ export default function ShareButtons({ cardRef, quizSlug, cardNumber, accentColo
 
   const handleShare = async () => {
     if (!cardRef.current || isExporting) return;
-    
+
     try {
       setIsExporting(true);
-      const dataUrl = await toPng(cardRef.current, {
-        quality: 1.0,
-        pixelRatio: 2,
-        cacheBust: true,
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
       });
 
-      if (navigator.share && navigator.canShare) {
-        // Convert base64 to blob
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-        const file = new File([blob], `facelab-${quizSlug}-${cardNumber}.png`, { type: 'image/png' });
+      const fileName = `facelab-${quizSlug}-${cardNumber}.png`;
 
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: 'FaceLab 결과',
-            text: 'FaceLab에서 내 결과를 확인해보세요!',
-            files: [file],
-          });
-          return;
+      // navigator.share 지원 여부 확인
+      if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
+        const blob = await new Promise<Blob | null>((resolve) => {
+          canvas.toBlob((b) => resolve(b), 'image/png');
+        });
+
+        if (blob) {
+          const file = new File([blob], fileName, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'FaceLab 결과',
+              text: 'FaceLab에서 내 결과를 확인해보세요!',
+              files: [file],
+            });
+            return;
+          }
         }
       }
-      
-      // Fallback to download if Web Share API is not supported or sharing files is not allowed
+
+      // navigator.share 미지원 또는 파일 공유 미지원 시 다운로드로 폴백
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.download = `facelab-${quizSlug}-${cardNumber}.png`;
+      link.download = fileName;
       link.href = dataUrl;
       link.click();
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
+      if (err?.name !== 'AbortError') {
         console.error('Failed to share image', err);
-        alert('공유하기에 실패했습니다. 대신 다운로드됩니다.');
-        // Fallback to download
-        handleDownload();
+        // 공유 실패 시 다운로드로 폴백
+        try {
+          if (cardRef.current) {
+            const canvas = await html2canvas(cardRef.current, {
+              backgroundColor: null,
+              scale: 2,
+            });
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `facelab-${quizSlug}-${cardNumber}.png`;
+            link.href = dataUrl;
+            link.click();
+          }
+        } catch (downloadErr) {
+          console.error('Failed fallback download after share error', downloadErr);
+        }
       }
     } finally {
       setIsExporting(false);
