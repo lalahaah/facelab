@@ -15,9 +15,9 @@ export default function Home() {
           <span className="font-display font-bold text-lg tracking-tight">FaceLab</span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm text-inkfade font-medium">
-          <Link href="#catalog" className="hover:text-ink transition-colors">혈액형</Link>
-          <Link href="#catalog" className="hover:text-ink transition-colors">나이 측정</Link>
-          <Link href="#catalog" className="hover:text-ink transition-colors">관상</Link>
+          <Link href="/quiz/blood-type" className="hover:text-ink transition-colors">혈액형</Link>
+          <Link href="/quiz/age-estimate" className="hover:text-ink transition-colors">나이 측정</Link>
+          <Link href="/quiz/face-reading" className="hover:text-ink transition-colors">관상</Link>
           <Link href="#how" className="hover:text-ink transition-colors">이용 방법</Link>
         </nav>
         <Link href="#catalog" className="text-sm font-semibold bg-ink text-paper px-4 py-2 rounded-full hover:opacity-85 transition-opacity">
