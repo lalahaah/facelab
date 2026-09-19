@@ -18,6 +18,9 @@ importers:
       '@teachablemachine/image':
         specifier: ^0.8.5
         version: 0.8.5(@tensorflow/tfjs@4.22.0(seedrandom@3.0.5))
+      '@tensorflow-models/face-detection':
+        specifier: ^1.0.3
+        version: 1.0.3(@mediapipe/face_detection@0.4.1646425229(patch_hash=92ee1945476f6861ce90b62b3a05534531c0dfaddad830557f1458e83177f515))(@tensorflow/tfjs-backend-webgl@4.22.0(@tensorflow/tfjs-core@4.22.0))(@tensorflow/tfjs-converter@4.22.0(@tensorflow/tfjs-core@4.22.0))(@tensorflow/tfjs-core@4.22.0)
       '@tensorflow-models/face-landmarks-detection':
         specifier: ^1.0.6
         version: 1.0.6(@mediapipe/face_mesh@0.4.1633559619(patch_hash=ee89ce917ef95bbe1072e016dfc32ded0539a11500cf6639cbf8094995c09282))(@tensorflow-models/face-detection@1.0.3(@mediapipe/face_detection@0.4.1646425229(patch_hash=92ee1945476f6861ce90b62b3a05534531c0dfaddad830557f1458e83177f515))(@tensorflow/tfjs-backend-webgl@4.22.0(@tensorflow/tfjs-core@4.22.0))(@tensorflow/tfjs-converter@4.22.0(@tensorflow/tfjs-core@4.22.0))(@tensorflow/tfjs-core@4.22.0))(@tensorflow/tfjs-backend-webgl@4.22.0(@tensorflow/tfjs-core@4.22.0))(@tensorflow/tfjs-converter@4.22.0(@tensorflow/tfjs-core@4.22.0))(@tensorflow/tfjs-core@4.22.0)
