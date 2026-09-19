@@ -112,19 +112,20 @@ facelab/
 
 - [x] **TASK-005-A2** 혈액형 재미 요소(스캔 연출/사진 활용/리빌 애니메이션/희귀도)
   - 파일: `components/ScanSequence.tsx`, `components/ResultReveal.tsx`, `lib/predictors/bloodType.ts`, `components/QuizRunner.tsx`
-  - 프롬프트 전달됨 — 완료 확인 대기
+  - ✅ 완료 (커밋 89a86ed)
 
 - [x] **TASK-005-A3** 혈액형 결과 카드 — "표본 카드(Specimen Card)" 스타일 + 공유 기능
   - 파일: `components/SpecimenCard.tsx`(신규), `components/ShareButtons.tsx`(신규), `lib/predictors/bloodType.ts`(수정), `components/QuizRunner.tsx`(수정)
-  - 카드에 업로드 사진(작게), 해시 기반 카드 번호, 혈액형별 능력치 바 3개, 희귀 등급별 홀로그래픽 효과
-  - 카드를 클라이언트에서 PNG로 캡처해 다운로드/공유 (서버 전송 없음, 프라이버시 원칙 유지)
-  - 검증: 카드 캡처 이미지 다운로드 확인, 모바일 공유 시트 정상 동작
+  - ✅ 기본 구현 완료 (커밋 201b479)
+  - ⚠️ **미해결 버그**: 이미지 캡처 실패("이미지 생성에 실패했습니다") + 결과 화면에 "선택된 파일 없음" 텍스트 노출
+    - 원인: html-to-image가 Tailwind v4의 oklch() 색상을 못 읽음 / file input 조건부 렌더링 누락 추정
+    - 수정 프롬프트 전달됨(html2canvas-pro로 교체 지시) — **컴퓨터 이전 중 실행 안 된 것으로 확인, 재실행 필요**
 
-- [ ] **TASK-005-B** 나이 측정: Teachable Machine 실제 모델 연동
-  - 전제조건: UTKFace 데이터셋으로 Teachable Machine 학습 완료 필요 (Laha 직접 진행,
-    가이드 별도 제공 예정 — 최신 Teachable Machine UI 기준)
-  - 파일: `components/QuizRunner.tsx`, `public/models/age-estimate/`
+- [x] **TASK-005-B** 나이 측정: Teachable Machine 실제 모델 연동
+  - 전제조건: UTKFace(동양인 필터링) 데이터셋으로 Teachable Machine 학습 완료, `public/models/age-estimate/`에 model.json/metadata.json/weights.bin 배치 ✅ 완료
+  - 파일: `components/QuizRunner.tsx`, `lib/predictors/ageEstimate.ts`(신규)
   - 검증: 업로드 시 연령대 예측 결과 정상 표시
+  - ✅ 완료. Teachable Machine 모델 연동 및 확률 분포 바 표시, 카드 번호 해시 함수 분리 및 공유
 
 - [ ] **TASK-005-C** 관상: 랜드마크 추출 + 서술형 문구뱅크 조합
   - 전제조건: `config/face-reading-phrases.ts` 문구뱅크 (Claude가 별도로 작성해서 전달 예정)
@@ -144,7 +145,7 @@ facelab/
 
 ## 6. 병행 트랙
 
-- [ ] 나이 측정용 UTKFace 데이터셋으로 Teachable Machine 학습 (TASK-005-B 전제조건)
+- [x] 나이 측정용 UTKFace 데이터셋으로 Teachable Machine 학습 (TASK-005-B 전제조건)
 - [ ] 관상 문구뱅크 설계 (Claude 작업, TASK-005-C 전제조건)
 
 혈액형(TASK-005-A)은 별도 준비 없이 바로 진행 가능.

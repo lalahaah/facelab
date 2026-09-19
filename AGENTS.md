@@ -75,6 +75,7 @@ google-services.json
 | 2026-08-09 | TASK-005-A | 혈액형 결정론적 예측 로직 |
 | 2026-08-09 | TASK-005-A2 | 혈액형 스캔 및 리빌 애니메이션 |
 | 2026-08-09 | TASK-005-A3 | 표본 카드 스타일 및 공유/저장 기능 |
+| 2026-09-19 | TASK-005-B | 나이 측정 Teachable Machine 모델 연동 |
 
 <!-- BEGIN:nextjs-agent-rules -->
 

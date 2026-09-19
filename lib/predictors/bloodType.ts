@@ -1,3 +1,5 @@
+import { getImageHashes } from './hash';
+
 export interface BloodTypePrediction {
   label: string;
   accuracy: number;
@@ -21,30 +23,12 @@ export function predictBloodType(imageElement: HTMLImageElement): BloodTypePredi
     ],
   };
 
-  const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
-  const ctx = canvas.getContext('2d');
-  
-  if (!ctx) return fallback;
+  const hashes = getImageHashes(imageElement);
+  if (!hashes) return fallback;
 
-  ctx.drawImage(imageElement, 0, 0, 32, 32);
-  const imageData = ctx.getImageData(0, 0, 32, 32).data;
-
-  let hash1 = 2166136261;
-  let hash2 = 1469598103;
-
-  for (let i = 0; i < imageData.length; i++) {
-    const byte = imageData[i];
-    hash1 ^= byte;
-    hash1 = Math.imul(hash1, 16777619);
-    
-    hash2 ^= byte;
-    hash2 = Math.imul(hash2, 0x5bd1e995);
-  }
+  const { hash1, hash2, cardNumber } = hashes;
 
   const score1 = Math.abs(hash1) % 100;
-  const cardNumber = String(Math.abs(hash1) % 10000).padStart(4, '0');
   
   let label = '';
   let rarityText = '';
@@ -83,4 +67,3 @@ export function predictBloodType(imageElement: HTMLImageElement): BloodTypePredi
 
   return { label, accuracy, rarityText, cardNumber, rarityTier, stats };
 }
-

@@ -42,6 +42,11 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
       setPreviewUrl(url);
       setIsScanning(true);
       setStep('scanning');
+    } else if (quiz.slug === 'age-estimate') {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setIsScanning(true);
+      setStep('scanning');
     } else {
       console.log('Selected file:', file.name);
       
@@ -106,9 +111,48 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     );
   }
 
+  if (step === 'scanning' && previewUrl && quiz.slug === 'age-estimate') {
+    return (
+      <ScanSequence 
+        imageUrl={previewUrl}
+        statusMessages={['피부 텍스처 분석 중...', '얼굴 윤곽 비교 중...', '연령대 매칭 중...']}
+        durationMs={2400}
+        accentColor={quiz.accentColor}
+        labNumber={quiz.labNumber}
+        onComplete={() => {
+          const img = new Image();
+          img.onload = async () => {
+            try {
+              const { predictAge } = await import('@/lib/predictors/ageEstimate');
+              const prediction = await predictAge(img);
+              
+              try {
+                await addDoc(collection(db, 'quiz_results'), {
+                  quizSlug: quiz.slug,
+                  resultLabel: prediction.label,
+                  createdAt: serverTimestamp(),
+                });
+              } catch (error) {
+                console.error('Failed to log quiz result to Firestore', error);
+              }
+              
+              setResult(prediction);
+              setIsScanning(false);
+              setStep('result');
+            } catch (error) {
+              console.error('Failed to predict age', error);
+              setIsScanning(false);
+            }
+          };
+          img.src = previewUrl;
+        }}
+      />
+    );
+  }
+
   // 2. Result Step (결과 화면에서는 업로드 input이 전혀 렌더링되지 않음)
   if (step === 'result' && result) {
-    if (quiz.slug === 'blood-type') {
+    if (quiz.slug === 'blood-type' || quiz.slug === 'age-estimate') {
       return (
         <div className="flex flex-col items-center justify-center py-16 px-6 w-full">
           <SpecimenCard
