@@ -8,4 +8,5 @@ export const faceReadingConfig: QuizConfig = {
   accentColor: 'jade',
   modelUrl: '',
   resultCopyIntro: 'AI 관상 분석 결과, 당신은',
+  disclaimer: '전통 관상 x AI 상상력의 조합이에요, 가볍게 즐겨주세요 👀',
 };

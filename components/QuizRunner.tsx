@@ -166,6 +166,11 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
             stats={result.stats}
             rarityTier={result.rarityTier}
           />
+          {quiz.disclaimer && (
+            <div className="mt-4 px-3 py-1 rounded-full bg-line/50 text-xs text-inkfade text-center font-medium">
+              {quiz.disclaimer}
+            </div>
+          )}
           <ShareButtons
             cardRef={cardRef}
             quizSlug={quiz.slug}

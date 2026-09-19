@@ -8,6 +8,7 @@ export interface QuizConfig {
   accentColor: AccentColor;
   modelUrl: string;
   resultCopyIntro: string;
+  disclaimer: string;
 }
 
 export const bloodTypeConfig: QuizConfig = {
@@ -18,4 +19,5 @@ export const bloodTypeConfig: QuizConfig = {
   accentColor: 'blood',
   modelUrl: '',
   resultCopyIntro: '당신의 혈액형은',
+  disclaimer: '혈액형과 성격은 과학적 근거가 없어요, 재미로만 봐주세요 🩸',
 };

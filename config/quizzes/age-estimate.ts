@@ -8,4 +8,5 @@ export const ageEstimateConfig: QuizConfig = {
   accentColor: 'amber',
   modelUrl: '',
   resultCopyIntro: 'AI가 예측한 당신의 나이는',
+  disclaimer: 'AI가 아직 한창 배우는 중이에요, 진짜 나이는 비밀로 해둘게요 😏',
 };
