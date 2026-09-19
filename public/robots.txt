@@ -1,3 +1,4 @@
+# 도메인 변경 시 이 파일도 함께 수정 필요
 User-agent: *
 Allow: /
-Sitemap: https://facelab.app/sitemap.xml
+Sitemap: https://facelab-eosin.vercel.app/sitemap.xml

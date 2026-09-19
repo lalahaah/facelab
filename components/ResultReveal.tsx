@@ -101,7 +101,7 @@ export default function ResultReveal({
             </div>
             
             <p className="relative z-10 catalog-tag text-[10px] text-paper/50 text-center">
-              facelab.app
+              FaceLab
             </p>
           </div>
         </ViewfinderFrame>

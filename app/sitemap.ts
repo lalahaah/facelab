@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { quizzes } from '@/config/quizzes';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://facelab.app';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://facelab.app';
 
   const quizRoutes = quizzes.map((quiz) => ({
     url: `${baseUrl}/quiz/${quiz.slug}`,

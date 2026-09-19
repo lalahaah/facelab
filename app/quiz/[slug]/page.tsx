@@ -24,13 +24,15 @@ export async function generateMetadata({
     };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://facelab.app';
+
   return {
     title: `${quiz.title} - FaceLab`,
     description: quiz.description,
     openGraph: {
       title: `${quiz.title} - FaceLab`,
       description: quiz.description,
-      url: `https://facelab.app/quiz/${slug}`,
+      url: `${siteUrl}/quiz/${slug}`,
     },
     twitter: {
       title: `${quiz.title} - FaceLab`,

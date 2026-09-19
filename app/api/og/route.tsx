@@ -120,7 +120,7 @@ export async function GET(request: Request) {
                 letterSpacing: '0.02em',
               }}
             >
-              facelab.app
+              FaceLab
             </span>
           </div>
         </div>

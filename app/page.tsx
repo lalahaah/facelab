@@ -126,7 +126,7 @@ export default function Home() {
             <p className="font-display font-extrabold text-4xl">B형</p>
             <p className="text-xs text-paper/60 mt-2">일치율 87%</p>
           </div>
-          <p className="catalog-tag text-[9px] text-paper/50 text-center">facelab.app</p>
+          <p className="catalog-tag text-[9px] text-paper/50 text-center">FaceLab</p>
         </div>
       </section>
 

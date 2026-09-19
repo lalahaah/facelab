@@ -120,7 +120,7 @@ const SpecimenCard = forwardRef<HTMLDivElement, SpecimenCardProps>(
 
         {/* Footer */}
         <div className="mt-auto text-center pt-4 border-t border-line/20">
-          <p className="catalog-tag text-[9px] text-paper/50 mb-1">facelab.app</p>
+          <p className="catalog-tag text-[9px] text-paper/50 mb-1">FaceLab</p>
           {rarityText && <p className="text-[11px] text-paper/80 font-medium">{rarityText}</p>}
         </div>
       </div>

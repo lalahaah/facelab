@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://facelab.app';
+
 export const metadata: Metadata = {
   title: 'FaceLab — 사진 한 장으로 알아보는 혈액형·나이·관상',
   description: 'AI가 브라우저에서 바로 분석해요. 사진은 저장되지 않습니다. 혈액형, 나이, 관상을 무료로 확인해보세요.',
   openGraph: {
     title: 'FaceLab — 사진 한 장으로 알아보는 혈액형·나이·관상',
     description: 'AI가 브라우저에서 바로 분석해요. 사진은 저장되지 않습니다. 혈액형, 나이, 관상을 무료로 확인해보세요.',
-    url: 'https://facelab.app',
+    url: siteUrl,
     siteName: 'FaceLab',
     type: 'website',
   },
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
     title: 'FaceLab — 사진 한 장으로 알아보는 혈액형·나이·관상',
     description: 'AI가 브라우저에서 바로 분석해요. 사진은 저장되지 않습니다. 혈액형, 나이, 관상을 무료로 확인해보세요.',
   },
-  metadataBase: new URL('https://facelab.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://facelab.app'),
 };
 
 export default function RootLayout({
