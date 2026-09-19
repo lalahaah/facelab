@@ -76,6 +76,7 @@ google-services.json
 | 2026-08-09 | TASK-005-A2 | 혈액형 스캔 및 리빌 애니메이션 |
 | 2026-08-09 | TASK-005-A3 | 표본 카드 스타일 및 공유/저장 기능 |
 | 2026-09-19 | TASK-005-B | 나이 측정 Teachable Machine 모델 연동 |
+| 2026-09-19 | TASK-005-C | 관상 랜드마크 분석 및 서술형 리포트 연동 |
 
 <!-- BEGIN:nextjs-agent-rules -->
 

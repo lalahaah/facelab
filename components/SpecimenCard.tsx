@@ -1,28 +1,30 @@
 import React, { forwardRef } from 'react';
-import { AccentColor } from '@/types/quiz';
 import { QuizConfig } from '@/config/quizzes';
 
 interface SpecimenCardProps {
   imageUrl?: string;
   quiz: QuizConfig;
-  label: string;
-  accuracy: number;
-  rarityText: string;
+  label?: string;
+  title?: string;
+  accuracy?: number;
+  rarityText?: string;
   cardNumber: string;
-  stats: { label: string; value: number }[];
+  stats?: { label: string; value: number }[];
+  paragraphs?: string[];
   rarityTier: 'common' | 'uncommon' | 'rare';
 }
 
 const SpecimenCard = forwardRef<HTMLDivElement, SpecimenCardProps>(
-  ({ imageUrl, quiz, label, accuracy, rarityText, cardNumber, stats, rarityTier }, ref) => {
+  ({ imageUrl, quiz, label, title, accuracy, rarityText, cardNumber, stats, paragraphs, rarityTier }, ref) => {
     
     const starCount = rarityTier === 'common' ? 1 : rarityTier === 'uncommon' ? 2 : 3;
     const accentVar = `var(--color-${quiz.accentColor})`;
+    const displayTitle = title || label;
 
     return (
       <div 
         ref={ref}
-        className="relative w-full max-w-[320px] aspect-[5/7] rounded-2xl bg-ink text-paper p-5 flex flex-col mx-auto overflow-hidden shadow-2xl border-[3px]"
+        className="relative w-full max-w-[320px] min-h-[448px] rounded-2xl bg-ink text-paper p-5 flex flex-col mx-auto overflow-hidden shadow-2xl border-[3px]"
         style={{ borderColor: accentVar }}
       >
         {/* Holographic overlay for rare */}
@@ -53,7 +55,7 @@ const SpecimenCard = forwardRef<HTMLDivElement, SpecimenCardProps>(
         </div>
 
         {/* Image */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-5">
           <div 
             className="w-1/2 aspect-square rounded-xl overflow-hidden shadow-inner flex items-center justify-center bg-paper/10"
             style={{ boxShadow: `0 0 0 2px ${accentVar}` }}
@@ -72,37 +74,54 @@ const SpecimenCard = forwardRef<HTMLDivElement, SpecimenCardProps>(
           </div>
         </div>
 
-        {/* Result Label */}
-        <div className="text-center mb-6">
-          <p className="font-display font-black text-6xl mb-1">{label}</p>
-          <p className="text-xs font-mono text-paper/60 tracking-wider">일치율 {accuracy}%</p>
+        {/* Result Label / Title */}
+        <div className="text-center mb-5">
+          <p className={`font-display font-black mb-1 tracking-tight leading-tight ${displayTitle && displayTitle.length > 4 ? 'text-3xl' : 'text-5xl'}`}>
+            {displayTitle}
+          </p>
+          {accuracy !== undefined && (
+            <p className="text-xs font-mono text-paper/60 tracking-wider">일치율 {accuracy}%</p>
+          )}
         </div>
 
-        {/* Stats */}
-        <div className="flex-1 flex flex-col gap-3 justify-center mb-4">
-          {stats.map((stat, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <span className="font-mono text-[10px] w-12 text-right text-paper/60">{stat.label}</span>
-              <div className="flex-1 h-1.5 bg-paper/10 rounded-full overflow-hidden">
-                <div 
-                  className="h-full rounded-full transition-all duration-1000 ease-out"
-                  style={{ 
-                    width: `${stat.value}%`,
-                    backgroundColor: accentVar,
-                    animation: `growWidth 1s ease-out forwards`,
-                    transformOrigin: 'left'
-                  }}
-                />
+        {/* Stats or Paragraphs */}
+        {paragraphs && paragraphs.length > 0 ? (
+          <div className="flex-1 flex flex-col gap-2.5 justify-center mb-5 text-xs text-paper/85 leading-relaxed text-left">
+            {paragraphs.map((para, i) => (
+              <p 
+                key={i} 
+                className={i === paragraphs.length - 1 ? 'text-[11px] text-paper/60 italic pt-2 border-t border-line/10' : ''}
+              >
+                {para}
+              </p>
+            ))}
+          </div>
+        ) : stats ? (
+          <div className="flex-1 flex flex-col gap-3 justify-center mb-4">
+            {stats.map((stat, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <span className="font-mono text-[10px] w-12 text-right text-paper/60">{stat.label}</span>
+                <div className="flex-1 h-1.5 bg-paper/10 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full transition-all duration-1000 ease-out"
+                    style={{ 
+                      width: `${stat.value}%`,
+                      backgroundColor: accentVar,
+                      animation: `growWidth 1s ease-out forwards`,
+                      transformOrigin: 'left'
+                    }}
+                  />
+                </div>
+                <span className="font-mono text-[10px] w-6 text-paper/80">{stat.value}</span>
               </div>
-              <span className="font-mono text-[10px] w-6 text-paper/80">{stat.value}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : null}
 
         {/* Footer */}
         <div className="mt-auto text-center pt-4 border-t border-line/20">
           <p className="catalog-tag text-[9px] text-paper/50 mb-1">facelab.app</p>
-          <p className="text-[11px] text-paper/80 font-medium">{rarityText}</p>
+          {rarityText && <p className="text-[11px] text-paper/80 font-medium">{rarityText}</p>}
         </div>
       </div>
     );

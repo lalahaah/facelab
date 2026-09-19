@@ -1,0 +1,23 @@
+diff --git a/face_detection.mjs b/face_detection.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..34585336b666c2f7ad3569d0e09c429157a60402
+--- /dev/null
++++ b/face_detection.mjs	
+@@ -0,0 +1,4 @@
++import './face_detection.js';
++const FaceDetection = typeof globalThis !== 'undefined' ? globalThis.FaceDetection : (typeof window !== 'undefined' ? window.FaceDetection : undefined);
++export { FaceDetection };
++export default FaceDetection;
+diff --git a/package.json b/package.json
+index 8c643df462cb19dd718392376254963af9957b30..ed77288f2fb6e293a3df3f62488ddbfc8a749b39 100644
+--- a/package.json
++++ b/package.json	
+@@ -3,7 +3,7 @@
+   "version": "0.4.1646425229",
+   "description": "Mediapipe Face Detection Solution",
+   "main": "face_detection.js",
+-  "module": "face_detection.js",
++  "module": "face_detection.mjs",
+   "jsdelivr": "face_detection.js",
+   "unpkg": "face_detection.js",
+   "types": "index.d.ts",

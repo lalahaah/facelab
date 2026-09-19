@@ -5,3 +5,6 @@ allowBuilds:
   sharp: false
   unrs-resolver: false
 nodeLinker: hoisted
+patchedDependencies:
+  '@mediapipe/face_detection': patches/@mediapipe__face_detection.patch
+  '@mediapipe/face_mesh': patches/@mediapipe__face_mesh.patch

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { QuizConfig } from '@/config/quizzes';
+import { AccentColor } from '@/types/quiz';
 import ViewfinderFrame from './ViewfinderFrame';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -10,19 +11,29 @@ import ResultReveal from './ResultReveal';
 import SpecimenCard from './SpecimenCard';
 import ShareButtons from './ShareButtons';
 
+const ACCENT_COLOR_MAP: Record<AccentColor, string> = {
+  blood: '#E63950',
+  amber: '#F2A93C',
+  jade: '#1FA37D',
+  scan: '#2D5BFF',
+};
+
 interface QuizRunnerProps {
   quiz: QuizConfig;
 }
 
-type QuizStep = 'upload' | 'scanning' | 'result';
+type QuizStep = 'upload' | 'scanning' | 'result' | 'error';
 
 export default function QuizRunner({ quiz }: QuizRunnerProps) {
   const [step, setStep] = useState<QuizStep>('upload');
   const [result, setResult] = useState<any | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const accentColorHex = ACCENT_COLOR_MAP[quiz.accentColor] || '#2D5BFF';
 
   // Cleanup on unmount
   useEffect(() => {
@@ -37,15 +48,11 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (quiz.slug === 'blood-type') {
+    if (quiz.slug === 'blood-type' || quiz.slug === 'age-estimate' || quiz.slug === 'face-reading') {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
       setIsScanning(true);
-      setStep('scanning');
-    } else if (quiz.slug === 'age-estimate') {
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      setIsScanning(true);
+      setErrorMessage(null);
       setStep('scanning');
     } else {
       console.log('Selected file:', file.name);
@@ -66,6 +73,7 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
   const handleReset = () => {
     setResult(null);
     setIsScanning(false);
+    setErrorMessage(null);
     setStep('upload');
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -150,9 +158,77 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     );
   }
 
-  // 2. Result Step (결과 화면에서는 업로드 input이 전혀 렌더링되지 않음)
+  if (step === 'scanning' && previewUrl && quiz.slug === 'face-reading') {
+    return (
+      <ScanSequence 
+        imageUrl={previewUrl}
+        statusMessages={['얼굴 랜드마크 추출 중...', '눈코입 비율 분석 중...', '관상 리포트 작성 중...']}
+        durationMs={2600}
+        accentColor={quiz.accentColor}
+        labNumber={quiz.labNumber}
+        onComplete={() => {
+          const img = new Image();
+          img.onload = async () => {
+            try {
+              const { predictFaceReading } = await import('@/lib/predictors/faceReading');
+              const prediction = await predictFaceReading(img);
+              
+              try {
+                await addDoc(collection(db, 'quiz_results'), {
+                  quizSlug: quiz.slug,
+                  resultLabel: prediction.title,
+                  createdAt: serverTimestamp(),
+                });
+              } catch (error) {
+                console.error('Failed to log quiz result to Firestore', error);
+              }
+              
+              setResult(prediction);
+              setIsScanning(false);
+              setStep('result');
+            } catch (error: any) {
+              console.error('Failed to predict face reading', error);
+              setIsScanning(false);
+              setErrorMessage(error?.message || '얼굴을 찾지 못했어요, 다른 사진으로 시도해주세요');
+              setStep('error');
+            }
+          };
+          img.src = previewUrl;
+        }}
+      />
+    );
+  }
+
+  // 2. Error Step (얼굴 미감지 등)
+  if (step === 'error') {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-6 text-center max-w-sm mx-auto">
+        <div 
+          className="w-16 h-16 rounded-full flex items-center justify-center mb-6 bg-paper border-2 shadow-sm"
+          style={{ borderColor: accentColorHex }}
+        >
+          <span className="text-2xl">⚠️</span>
+        </div>
+        <h2 className="font-display font-bold text-xl mb-3 text-ink">
+          얼굴을 찾지 못했어요
+        </h2>
+        <p className="text-sm text-inkfade mb-8 leading-relaxed">
+          {errorMessage || '얼굴이 정면으로 잘 나온 사진으로 다시 시도해주세요.'}
+        </p>
+        <button
+          onClick={handleReset}
+          className="px-6 py-3 rounded-full text-sm font-semibold text-white shadow-lg transition-transform active:scale-95 cursor-pointer"
+          style={{ backgroundColor: accentColorHex }}
+        >
+          다시 스캔하기
+        </button>
+      </div>
+    );
+  }
+
+  // 3. Result Step (결과 화면에서는 업로드 input이 전혀 렌더링되지 않음)
   if (step === 'result' && result) {
-    if (quiz.slug === 'blood-type' || quiz.slug === 'age-estimate') {
+    if (quiz.slug === 'blood-type' || quiz.slug === 'age-estimate' || quiz.slug === 'face-reading') {
       return (
         <div className="flex flex-col items-center justify-center py-16 px-6 w-full">
           <SpecimenCard
@@ -160,10 +236,12 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
             imageUrl={previewUrl || undefined}
             quiz={quiz}
             label={result.label}
+            title={result.title}
             accuracy={result.accuracy}
             rarityText={result.rarityText}
             cardNumber={result.cardNumber}
             stats={result.stats}
+            paragraphs={result.paragraphs}
             rarityTier={result.rarityTier}
           />
           {quiz.disclaimer && (
@@ -196,10 +274,10 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     );
   }
 
-  // 3. Upload Step (업로드 단계에서만 input[type="file"] 렌더링)
+  // 4. Upload Step (업로드 단계에서만 input[type="file"] 렌더링)
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6">
-      <p className="catalog-tag text-xs font-medium mb-2" style={{ color: `var(--color-${quiz.accentColor})` }}>
+      <p className="catalog-tag text-xs font-medium mb-2" style={{ color: accentColorHex }}>
         [{quiz.labNumber}]
       </p>
       <h1 className="font-display font-bold text-3xl mb-8">{quiz.title}</h1>

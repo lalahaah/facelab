@@ -127,13 +127,14 @@ facelab/
   - 검증: 업로드 시 연령대 예측 결과 정상 표시
   - ✅ 완료. Teachable Machine 모델 연동 및 확률 분포 바 표시, 카드 번호 해시 함수 분리 및 공유
 
-- [ ] **TASK-005-C** 관상: 랜드마크 추출 + 서술형 문구뱅크 조합
+- [x] **TASK-005-C** 관상: 랜드마크 추출 + 서술형 문구뱅크 조합
   - 전제조건: `config/face-reading-phrases.ts` 문구뱅크 (Claude가 별도로 작성해서 전달 예정)
   - 파일: `lib/predictors/faceReading.ts`, `config/face-reading-phrases.ts`, `components/QuizRunner.tsx`
   - 방식: MediaPipe FaceMesh(@mediapipe/tasks-vision 또는 TensorFlow.js face-landmarks-detection)로
     얼굴 랜드마크 추출 → 눈/코/입/얼굴형 비율 계산 → 문구뱅크에서 특징 구간별 문장 조합 →
     2~3문단 서술형 결과 생성
   - 검증: 업로드 시 서술형 리포트(여러 문단) 정상 표시, 얼굴 미검출 시 에러 처리
+  - ✅ 완료. MediaPipe FaceMesh 랜드마크 추출, 4개 비율 계산 및 문구뱅크 조합, 서술형 결과 카드 및 미검출 에러 상태 구현
 
 ## 5. 사전 커밋 체크 (매 태스크 공통)
 

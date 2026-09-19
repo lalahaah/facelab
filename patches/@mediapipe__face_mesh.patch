@@ -1,0 +1,23 @@
+diff --git a/face_mesh.mjs b/face_mesh.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..989327579999f3fda3eb941e321816bc33ecf982
+--- /dev/null
++++ b/face_mesh.mjs	
+@@ -0,0 +1,4 @@
++import './face_mesh.js';
++const FaceMesh = typeof globalThis !== 'undefined' ? globalThis.FaceMesh : (typeof window !== 'undefined' ? window.FaceMesh : undefined);
++export { FaceMesh };
++export default FaceMesh;
+diff --git a/package.json b/package.json
+index 41fadb26a67dd450ace1348f7fb5de28693f23d7..04e0098f56d6e88a7deaa2558107e799163c9765 100644
+--- a/package.json
++++ b/package.json	
+@@ -3,7 +3,7 @@
+   "version": "0.4.1633559619",
+   "description": "Mediapipe Face Mesh Solution",
+   "main": "face_mesh.js",
+-  "module": "face_mesh.js",
++  "module": "face_mesh.mjs",
+   "jsdelivr": "face_mesh.js",
+   "unpkg": "face_mesh.js",
+   "types": "index.d.ts",
