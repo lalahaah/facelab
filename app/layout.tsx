@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://facelab.app'),
   verification: {
     google: 'CPysx2ERXBLCxjoV6pZGsa7x2mGZsYrYnFiBQep4Buc',
+    other: {
+      'naver-site-verification': '485cb99c6a483f92972cc771fcb487b2bee756cc',
+    },
   },
 };
 
