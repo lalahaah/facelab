@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     description: 'AI가 브라우저에서 바로 분석해요. 사진은 저장되지 않습니다. 혈액형, 나이, 관상을 무료로 확인해보세요.',
   },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://facelab.app'),
+  verification: {
+    google: 'CPysx2ERXBLCxjoV6pZGsa7x2mGZsYrYnFiBQep4Buc',
+  },
 };
 
 export default function RootLayout({
