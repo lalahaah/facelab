@@ -10,6 +10,7 @@ import ScanSequence from './ScanSequence';
 import ResultReveal from './ResultReveal';
 import SpecimenCard from './SpecimenCard';
 import ShareButtons from './ShareButtons';
+import CameraCapture from './CameraCapture';
 
 const ACCENT_COLOR_MAP: Record<AccentColor, string> = {
   blood: '#E63950',
@@ -30,6 +31,7 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,10 +46,7 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     };
   }, [previewUrl]);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleImageSelected = async (file: File) => {
     if (quiz.slug === 'blood-type' || quiz.slug === 'age-estimate' || quiz.slug === 'face-reading') {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
@@ -70,10 +69,17 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    handleImageSelected(file);
+  };
+
   const handleReset = () => {
     setResult(null);
     setIsScanning(false);
     setErrorMessage(null);
+    setIsCameraOpen(false);
     setStep('upload');
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -274,7 +280,29 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
     );
   }
 
-  // 4. Upload Step (업로드 단계에서만 input[type="file"] 렌더링)
+  // 4. Camera Step (실시간 카메라 촬영 화면)
+  if (isCameraOpen) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-6">
+        <p className="catalog-tag text-xs font-medium mb-2" style={{ color: accentColorHex }}>
+          [{quiz.labNumber}]
+        </p>
+        <h1 className="font-display font-bold text-3xl mb-8">{quiz.title}</h1>
+        <CameraCapture
+          accentColor={quiz.accentColor}
+          onCapture={(file) => {
+            setIsCameraOpen(false);
+            handleImageSelected(file);
+          }}
+          onCancel={() => {
+            setIsCameraOpen(false);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // 5. Upload Step (기본 업로드 시작 화면)
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6">
       <p className="catalog-tag text-xs font-medium mb-2" style={{ color: accentColorHex }}>
@@ -299,6 +327,27 @@ export default function QuizRunner({ quiz }: QuizRunnerProps) {
             />
           </div>
         </ViewfinderFrame>
+      </div>
+
+      {/* 업로드 & 카메라 버튼 영역 */}
+      <div className="flex items-center gap-3 mt-6 w-full max-w-sm">
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex-1 py-3 px-4 rounded-xl border border-line bg-white hover:bg-paper text-ink text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-95 cursor-pointer"
+        >
+          <span>📁</span>
+          <span>사진 업로드</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsCameraOpen(true)}
+          className="flex-1 py-3 px-4 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 cursor-pointer"
+          style={{ backgroundColor: accentColorHex }}
+        >
+          <span>📷</span>
+          <span>카메라로 촬영</span>
+        </button>
       </div>
       
       <p className="mt-8 text-sm text-inkfade max-w-sm text-center leading-relaxed">
